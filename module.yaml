@@ -1,0 +1,17 @@
+notests *default:
+  build:
+    target: Vostok.Snitch.Core.sln
+    configuration: NoTests
+    tool:
+      name: dotnet
+
+  install:
+    - Vostok.Snitch.Core/bin/Release/netstandard2.0/Vostok.Snitch.Core.dll
+
+  deps:
+    - vostok.devtools
+
+full-build > notests:
+  build:
+    target: Vostok.Snitch.Core.sln
+    configuration: Release
