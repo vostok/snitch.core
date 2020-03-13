@@ -2,7 +2,7 @@
 using System.Globalization;
 using JetBrains.Annotations;
 
-namespace Vostok.Snitch.Core.UrlNormalizer
+namespace Vostok.Snitch.Core
 {
     [PublicAPI]
     public class UrlNormalizer

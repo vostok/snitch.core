@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using NUnit.Framework;
-using Vostok.Snitch.Core.UrlNormalizer;
 
 namespace Vostok.Snitch.Core.Tests.UrlNormalizer
 {
@@ -12,7 +11,7 @@ namespace Vostok.Snitch.Core.Tests.UrlNormalizer
         [TestCase("http://google.com/foo/5435453/bar", "foo/~/bar")]
         public void Should_normalize_path(string url, string expected)
         {
-            new Core.UrlNormalizer.UrlNormalizer()
+            new Core.UrlNormalizer()
                 .NormalizePath(null, new Uri(url, UriKind.Absolute))
                 .Should()
                 .Be(expected);
@@ -43,7 +42,7 @@ namespace Vostok.Snitch.Core.Tests.UrlNormalizer
                 }
             };
 
-            new Core.UrlNormalizer.UrlNormalizer(() => settings)
+            new Core.UrlNormalizer(() => settings)
                 .NormalizePath(service, new Uri(url, UriKind.Absolute))
                 .Should()
                 .Be(expected);
