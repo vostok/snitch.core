@@ -24,6 +24,7 @@ namespace Vostok.Snitch.Core.Tests.UrlNormalizer
         [TestCase("cut", "http://google.com/foo/5435453/bar", "foo~")]
         [TestCase("cut", "http://google.com/foo/5435453/bar/trash", "foo/~/bar/~")]
         [TestCase("cut", "http://google.com/slash/5435453/bar", "slash/~")]
+        [TestCase("cut", "http://google.com/foo", "foo")]
         [TestCase("cut_all", "http://google.com/foo/5435453/bar", "~")]
         public void Should_cut_suffixes_for_service(string service, string url, string expected)
         {
