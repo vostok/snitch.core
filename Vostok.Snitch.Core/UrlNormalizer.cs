@@ -23,7 +23,7 @@ namespace Vostok.Snitch.Core
 
             var normalizedPath = Commons.Helpers.Url.UrlNormalizer.NormalizePath(path);
 
-            return NormalizedInner(service, normalizedPath);
+            return Normalize(service, normalizedPath);
         }
 
         public string NormalizePath([CanBeNull] string service, [CanBeNull] Uri url)
@@ -33,10 +33,10 @@ namespace Vostok.Snitch.Core
 
             var normalizedPath = Commons.Helpers.Url.UrlNormalizer.NormalizePath(url);
 
-            return NormalizedInner(service, normalizedPath);
+            return Normalize(service, normalizedPath);
         }
 
-        private string NormalizedInner(string service, string normalizedPath)
+        private string Normalize(string service, string normalizedPath)
         {
             var settings = settingsProvider?.Invoke();
 
