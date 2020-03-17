@@ -16,6 +16,16 @@ namespace Vostok.Snitch.Core
             this.settingsProvider = settingsProvider;
         }
 
+        public string NormalizePath([CanBeNull] string service, [CanBeNull] string path)
+        {
+            if (path == null)
+                return null;
+
+            var normalizedPath = Commons.Helpers.Url.UrlNormalizer.NormalizePath(path);
+
+            return NormalizedInner(service, normalizedPath);
+        }
+
         public string NormalizePath([CanBeNull] string service, [CanBeNull] Uri url)
         {
             if (url == null)
@@ -23,6 +33,11 @@ namespace Vostok.Snitch.Core
 
             var normalizedPath = Commons.Helpers.Url.UrlNormalizer.NormalizePath(url);
 
+            return NormalizedInner(service, normalizedPath);
+        }
+
+        private string NormalizedInner(string service, string normalizedPath)
+        {
             var settings = settingsProvider?.Invoke();
 
             if (service == null ||
