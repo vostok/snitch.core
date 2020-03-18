@@ -11,7 +11,7 @@ namespace Vostok.Snitch.Core.Tests
         [TestCase("http://google.com/foo/5435453/bar", "foo/~/bar")]
         public void Should_normalize_path(string url, string expected)
         {
-            new Core.UrlNormalizer()
+            new UrlNormalizer()
                 .NormalizePath(null, new Uri(url, UriKind.Absolute))
                 .Should()
                 .Be(expected);
@@ -34,16 +34,16 @@ namespace Vostok.Snitch.Core.Tests
                 {
                     ["cut"] = new UrlNormalizerServiceSettings
                     {
-                        FilteredPrefixes = new []{"foo/~/bar/", "foo", "slash/"}
+                        FilteredPrefixes = new[] {"foo/~/bar/", "foo", "slash/"}
                     },
                     ["cut_all"] = new UrlNormalizerServiceSettings
                     {
-                        FilteredPrefixes = new []{""}
+                        FilteredPrefixes = new[] {""}
                     }
                 }
             };
 
-            new Core.UrlNormalizer(() => settings)
+            new UrlNormalizer(() => settings)
                 .NormalizePath(service, new Uri(url, UriKind.Absolute))
                 .Should()
                 .Be(expected);
@@ -59,12 +59,12 @@ namespace Vostok.Snitch.Core.Tests
                 {
                     ["cut"] = new UrlNormalizerServiceSettings
                     {
-                        FilteredPrefixes = new[] { "track/~/~/open", "track/" }
+                        FilteredPrefixes = new[] {"track/~/~/open", "track/"}
                     }
                 }
             };
 
-            new Core.UrlNormalizer(() => settings)
+            new UrlNormalizer(() => settings)
                 .NormalizePath("cut", new Uri(url, UriKind.Absolute))
                 .Should()
                 .Be(expected);

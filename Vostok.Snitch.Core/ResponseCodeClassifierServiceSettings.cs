@@ -6,7 +6,7 @@ using Vostok.Clusterclient.Core.Model;
 namespace Vostok.Snitch.Core
 {
     [PublicAPI]
-    public class StatusClassifierServiceSettings
+    public class ResponseCodeClassifierServiceSettings
     {
         [CanBeNull]
         public TimeSpan? TimeoutErrorClassificationThreshold { get; set; }

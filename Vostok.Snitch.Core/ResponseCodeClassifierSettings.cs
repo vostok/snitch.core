@@ -7,7 +7,7 @@ using Vostok.Commons.Time;
 namespace Vostok.Snitch.Core
 {
     [PublicAPI]
-    public class StatusClassifierSettings
+    public class ResponseCodeClassifierSettings
     {
         public TimeSpan TimeoutErrorClassificationThreshold { get; set; } = 100.Milliseconds();
 
@@ -21,6 +21,6 @@ namespace Vostok.Snitch.Core
         public List<ResponseCode> ErrorCodes { get; set; }
 
         [CanBeNull]
-        public Dictionary<string, StatusClassifierServiceSettings> PerServiceSettings { get; set; }
+        public Dictionary<string, ResponseCodeClassifierServiceSettings> PerServiceSettings { get; set; }
     }
 }

@@ -8,16 +8,16 @@ namespace Vostok.Snitch.Core
     [PublicAPI]
     public class ResponseCodeClassifier
     {
-        private readonly Func<StatusClassifierSettings> settingsProvider;
+        private readonly Func<ResponseCodeClassifierSettings> settingsProvider;
 
-        public ResponseCodeClassifier([CanBeNull] Func<StatusClassifierSettings> settingsProvider = null)
+        public ResponseCodeClassifier([CanBeNull] Func<ResponseCodeClassifierSettings> settingsProvider = null)
         {
             this.settingsProvider = settingsProvider;
         }
 
         public ResponseCodeClass ClassifyResponseCode(string service, ResponseCode code, TimeSpan latency)
         {
-            var settings = settingsProvider?.Invoke() ?? new StatusClassifierSettings();
+            var settings = settingsProvider?.Invoke() ?? new ResponseCodeClassifierSettings();
             var serviceSettings = GetServiceSettings(settings, service);
 
             if (serviceSettings?.SuccessCodes?.Contains(code) == true)
@@ -57,7 +57,7 @@ namespace Vostok.Snitch.Core
             return ResponseCodeClass.Warning;
         }
 
-        private StatusClassifierServiceSettings GetServiceSettings(StatusClassifierSettings settings, string service)
+        private ResponseCodeClassifierServiceSettings GetServiceSettings(ResponseCodeClassifierSettings settings, string service)
         {
             if (service == null ||
                 settings?.PerServiceSettings == null ||
