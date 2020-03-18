@@ -50,6 +50,9 @@ namespace Vostok.Snitch.Core
             {
                 foreach (var filteredPrefix in serviceSettings.FilteredPrefixes)
                 {
+                    if (filteredPrefix.Length == normalizedPath.Length && normalizedPath.Equals(filteredPrefix, StringComparison.InvariantCultureIgnoreCase))
+                        return normalizedPath;
+
                     if (filteredPrefix.Length < normalizedPath.Length && normalizedPath.StartsWith(filteredPrefix, true, CultureInfo.InvariantCulture))
                     {
                         return filteredPrefix.ToLowerInvariant() + Tilde;

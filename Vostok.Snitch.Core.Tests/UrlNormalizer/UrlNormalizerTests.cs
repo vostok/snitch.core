@@ -48,5 +48,26 @@ namespace Vostok.Snitch.Core.Tests.UrlNormalizer
                 .Should()
                 .Be(expected);
         }
+
+        [TestCase("http://google.com/track/~/~/open", "track/~/~/open")]
+        [TestCase("http://google.com/track/guid/guid/open", "track/~")]
+        public void Should_not_touch_already_normalized_urls(string url, string expected)
+        {
+            var settings = new UrlNormalizerSettings
+            {
+                PerServiceSettings = new Dictionary<string, UrlNormalizerServiceSettings>
+                {
+                    ["cut"] = new UrlNormalizerServiceSettings
+                    {
+                        FilteredPrefixes = new[] { "track/~/~/open", "track/" }
+                    }
+                }
+            };
+
+            new Core.UrlNormalizer(() => settings)
+                .NormalizePath("cut", new Uri(url, UriKind.Absolute))
+                .Should()
+                .Be(expected);
+        }
     }
 }
