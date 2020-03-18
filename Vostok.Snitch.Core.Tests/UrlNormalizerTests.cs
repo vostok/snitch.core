@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using FluentAssertions;
 using NUnit.Framework;
 
-namespace Vostok.Snitch.Core.Tests.UrlNormalizer
+namespace Vostok.Snitch.Core.Tests
 {
     [TestFixture]
     internal class UrlNormalizerTests

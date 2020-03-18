@@ -1,24 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-  
   <Import Project="..\..\vostok.devtools\library-common-props\Main-Project.props" />
   <Import Project="..\..\vostok.devtools\git-commit-to-assembly-title\Vostok.Tools.GitCommit2AssemblyTitle.props" />
-
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Configurations>Debug;Release</Configurations>
     <LangVersion>7.2</LangVersion>
   </PropertyGroup>
-
   <PropertyGroup>
     <VersionPrefix>0.0.1</VersionPrefix>
   </PropertyGroup>
-
   <PropertyGroup>
     <Title>Vostok.Snitch.Core</Title>
     <Description>A set of Snitch utils.</Description>
   </PropertyGroup>
-
   <PropertyGroup>
     <PackageProjectUrl>https://github.com/vostok/snitch.core</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/vostok/snitch.core/blob/master/LICENSE</PackageLicenseUrl>
@@ -26,15 +21,23 @@
     <PackageReleaseNotes>https://github.com/vostok/snitch.core/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <RepositoryUrl>https://github.com/vostok/snitch.core</RepositoryUrl>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="..\..\vostok.commons.helpers\Vostok.Commons.Helpers\Url\UrlExtensions.cs" Link="Commons\UrlExtensions.cs" />
     <Compile Include="..\..\vostok.commons.helpers\Vostok.Commons.Helpers\Url\UrlNormalizer.cs" Link="Commons\UrlNormalizer.cs" />
     <Compile Include="..\..\vostok.commons.helpers\Vostok.Commons.Helpers\Url\UrlParser.cs" Link="Commons\UrlParser.cs" />
+    <Compile Include="..\..\vostok.commons.time\Vostok.Commons.Time\TimeSpanConversions.cs" Link="Commons\TimeSpanConversions.cs" />
   </ItemGroup>
-
   <ItemGroup>
     <Folder Include="Commons\" />
   </ItemGroup>
-  
+  <ItemGroup>
+    <Reference Include="Vostok.ClusterClient.Core">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\vostok.clusterclient.core\Vostok.ClusterClient.Core\bin\Release\netstandard2.0\Vostok.ClusterClient.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Vostok.Logging.Abstractions">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\vostok.logging.abstractions\Vostok.Logging.Abstractions\bin\Release\netstandard2.0\Vostok.Logging.Abstractions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

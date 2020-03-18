@@ -7,8 +7,11 @@ notests *default:
 
   install:
     - Vostok.Snitch.Core/bin/Release/netstandard2.0/Vostok.Snitch.Core.dll
+    - moduel vostok.clusterclient.core
 
   deps:
+    - vostok.clusterclient.core
+    - vostok.logging.abstractions
     - vostok.devtools
     - vostok.commons.helpers/src
 
