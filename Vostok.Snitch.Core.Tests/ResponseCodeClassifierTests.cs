@@ -15,9 +15,9 @@ namespace Vostok.Snitch.Core.Tests
         {
             var classifier = new ResponseCodeClassifier();
 
-            classifier.ClassifyResponseCode("service", ResponseCode.Ok, 1.Seconds()).Should().Be(ResponseCodeClass.Success);
-            classifier.ClassifyResponseCode("service", ResponseCode.Conflict, 1.Seconds()).Should().Be(ResponseCodeClass.Warning);
-            classifier.ClassifyResponseCode("service", ResponseCode.InternalServerError, 1.Seconds()).Should().Be(ResponseCodeClass.Error);
+            classifier.Classify("service", ResponseCode.Ok, 1.Seconds()).Should().Be(ResponseCodeClass.Success);
+            classifier.Classify("service", ResponseCode.Conflict, 1.Seconds()).Should().Be(ResponseCodeClass.Warning);
+            classifier.Classify("service", ResponseCode.InternalServerError, 1.Seconds()).Should().Be(ResponseCodeClass.Error);
         }
 
         [TestCase("service", ResponseCode.InternalServerError, ResponseCodeClass.Success)]
@@ -56,7 +56,7 @@ namespace Vostok.Snitch.Core.Tests
 
             var classifier = new ResponseCodeClassifier(() => settings);
 
-            classifier.ClassifyResponseCode(service, code, 1.Seconds()).Should().Be(expected);
+            classifier.Classify(service, code, 1.Seconds()).Should().Be(expected);
         }
 
         [TestCase("service", 4, ResponseCodeClass.Warning)]
@@ -81,7 +81,7 @@ namespace Vostok.Snitch.Core.Tests
 
             var classifier = new ResponseCodeClassifier(() => settings);
 
-            classifier.ClassifyResponseCode(service, ResponseCode.RequestTimeout, latency.Seconds()).Should().Be(expected);
+            classifier.Classify(service, ResponseCode.RequestTimeout, latency.Seconds()).Should().Be(expected);
         }
     }
 }

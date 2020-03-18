@@ -15,7 +15,7 @@ namespace Vostok.Snitch.Core
             this.settingsProvider = settingsProvider;
         }
 
-        public ResponseCodeClass ClassifyResponseCode(string service, ResponseCode code, TimeSpan latency)
+        public ResponseCodeClass Classify(string service, ResponseCode code, TimeSpan latency)
         {
             var settings = settingsProvider?.Invoke() ?? new ResponseCodeClassifierSettings();
             var serviceSettings = GetServiceSettings(settings, service);
