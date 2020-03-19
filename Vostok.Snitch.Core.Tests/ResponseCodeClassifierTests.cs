@@ -60,10 +60,12 @@ namespace Vostok.Snitch.Core.Tests
         }
 
         [TestCase("service", 4, ResponseCodeClass.Warning)]
+        [TestCase("service", 5, ResponseCodeClass.Error)]
         [TestCase("service", 6, ResponseCodeClass.Error)]
         [TestCase("not_a_service", 9, ResponseCodeClass.Warning)]
+        [TestCase("not_a_service", 10, ResponseCodeClass.Error)]
         [TestCase("not_a_service", 11, ResponseCodeClass.Error)]
-        public void Should_classify_using_timeout_error_classification_threshold_setting(string service, int latency, ResponseCodeClass expected)
+        public void Should_classify_using_timeout_error_classification_threshold_setting(string service, int secondsLatency, ResponseCodeClass expected)
         {
             var serviceSettings = new ResponseCodeClassifierServiceSettings
             {
@@ -81,7 +83,7 @@ namespace Vostok.Snitch.Core.Tests
 
             var classifier = new ResponseCodeClassifier(() => settings);
 
-            classifier.Classify(service, ResponseCode.RequestTimeout, latency.Seconds()).Should().Be(expected);
+            classifier.Classify(service, ResponseCode.RequestTimeout, secondsLatency.Seconds()).Should().Be(expected);
         }
     }
 }

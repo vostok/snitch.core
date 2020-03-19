@@ -42,7 +42,7 @@ namespace Vostok.Snitch.Core
 
             if (code == ResponseCode.RequestTimeout)
             {
-                return latency > (serviceSettings?.TimeoutErrorClassificationThreshold ?? settings.TimeoutErrorClassificationThreshold)
+                return latency >= (serviceSettings?.TimeoutErrorClassificationThreshold ?? settings.TimeoutErrorClassificationThreshold)
                     ? ResponseCodeClass.Error
                     : ResponseCodeClass.Warning;
             }

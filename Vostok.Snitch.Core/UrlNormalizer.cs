@@ -39,11 +39,9 @@ namespace Vostok.Snitch.Core
         private string Normalize(string service, string normalizedPath)
         {
             var settings = settingsProvider?.Invoke();
+            var serviceSettings = GetServiceSettings(settings, service);
 
-            if (service == null ||
-                settings?.PerServiceSettings == null ||
-                !settings.PerServiceSettings.TryGetValue(service, out var serviceSettings) ||
-                serviceSettings == null)
+            if (serviceSettings == null)
                 return normalizedPath;
 
             if (serviceSettings.FilteredPrefixes != null)
@@ -61,6 +59,17 @@ namespace Vostok.Snitch.Core
             }
 
             return normalizedPath;
+        }
+
+        private UrlNormalizerServiceSettings GetServiceSettings(UrlNormalizerSettings settings, string service)
+        {
+            if (service == null ||
+                settings?.PerServiceSettings == null ||
+                !settings.PerServiceSettings.TryGetValue(service, out var serviceSettings) ||
+                serviceSettings == null)
+                return null;
+
+            return serviceSettings;
         }
     }
 }
