@@ -1,5 +1,8 @@
-﻿namespace Vostok.Snitch.Core.Helpers
+﻿using JetBrains.Annotations;
+
+namespace Vostok.Snitch.Core.Helpers
 {
+    [PublicAPI]
     public static class NamesEscaper
     {
         public static string Escape(string name)
@@ -12,7 +15,7 @@
                 .Replace(':', '_')
                 .Replace('*', '_')
                 .Replace('#', '_')
-                .Replace('~', ':');
+                .Replace('~', '_');
         }
     }
 }

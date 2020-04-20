@@ -3,12 +3,12 @@
 namespace Vostok.Snitch.Core.Models
 {
     [PublicAPI]
-    public struct Target
+    public struct TopologyKey
     {
         public readonly string Environment;
         public readonly string Service;
 
-        public Target(string environment, string service)
+        public TopologyKey(string environment, string service)
         {
             Service = service;
             Environment = environment;
@@ -16,11 +16,11 @@ namespace Vostok.Snitch.Core.Models
 
         #region EqualityMembers
 
-        public bool Equals(Target other) =>
+        public bool Equals(TopologyKey other) =>
             string.Equals(Service, other.Service) && string.Equals(Environment, other.Environment);
 
         public override bool Equals(object obj) =>
-            obj is Target other && Equals(other);
+            obj is TopologyKey other && Equals(other);
 
         public override int GetHashCode()
         {
