@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace Vostok.Snitch.Core.Tests
 {
     [TestFixture]
-    internal class UrlNormalizerTests
+    internal class UrlNormalizer_Tests
     {
         [TestCase("http://google.com/foo/5435453/bar", "foo/~/bar")]
         public void Should_normalize_path(string url, string expected)

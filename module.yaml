@@ -10,6 +10,10 @@ notests *default:
     - module vostok.clusterclient.core
 
   deps:
+    - vostok.servicediscovery.abstractions
+    - vostok.clusterclient.topology.cc
+    - vostok.clusterconfig.client.abstractions
+    - vostok.configuration.abstractions
     - vostok.clusterclient.core
     - vostok.logging.abstractions
     - vostok.devtools

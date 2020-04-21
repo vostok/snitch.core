@@ -5,6 +5,8 @@ namespace Vostok.Snitch.Core.Models
     [PublicAPI]
     public struct TopologyKey
     {
+        public const string DefaultEnvironment = "default";
+
         public readonly string Environment;
         public readonly string Service;
 

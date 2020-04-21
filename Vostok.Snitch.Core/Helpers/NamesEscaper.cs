@@ -15,7 +15,7 @@ namespace Vostok.Snitch.Core.Helpers
                 .Replace(':', '_')
                 .Replace('*', '_')
                 .Replace('#', '_')
-                .Replace('~', '_');
+                .Replace('~', ':');
         }
     }
 }

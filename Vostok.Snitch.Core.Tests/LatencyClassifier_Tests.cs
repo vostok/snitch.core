@@ -6,7 +6,7 @@ using Vostok.Commons.Time;
 namespace Vostok.Snitch.Core.Tests
 {
     [TestFixture]
-    internal class LatencyClassifierTests
+    internal class LatencyClassifier_Tests
     {
         [Test]
         public void Should_classify_without_settings()

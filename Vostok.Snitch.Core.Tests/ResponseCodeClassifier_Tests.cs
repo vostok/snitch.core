@@ -8,7 +8,7 @@ using Vostok.Snitch.Core.Models;
 namespace Vostok.Snitch.Core.Tests
 {
     [TestFixture]
-    internal class ResponseCodeClassifierTests
+    internal class ResponseCodeClassifier_Tests
     {
         [Test]
         public void Should_classify_without_settings()
