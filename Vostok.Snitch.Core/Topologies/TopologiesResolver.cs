@@ -65,13 +65,11 @@ namespace Vostok.Snitch.Core.Topologies
             if (state == NotStarted)
                 throw new InvalidOperationException("Warmup should be called first.");
 
-            environment = environment ?? TopologyKey.DefaultEnvironment;
-
             var replica = new TopologyReplica(ResolveHost(url.DnsSafeHost), url.Port, url.AbsolutePath);
             if (!topologies.TryGetValue((replica.Host, replica.Port), out var candidate) || !candidate.Any())
             {
                 if (service != null)
-                    return new[] {new TopologyKey(environment, service)};
+                    return new[] {new TopologyKey(environment ?? TopologyKey.DefaultEnvironment, service)};
 
                 return Enumerable.Empty<TopologyKey>();
             }
@@ -80,6 +78,10 @@ namespace Vostok.Snitch.Core.Topologies
             if (filteredByService.Any())
                 candidate = filteredByService;
 
+            var filteredByEnvironment = candidate.Where(c => c.Key.Environment == environment).ToList();
+            if (filteredByEnvironment.Any())
+                candidate = filteredByEnvironment;
+
             var filteredByPath = candidate.Where(c => url.AbsolutePath.StartsWith(c.Replica.Path)).ToList();
             if (filteredByPath.Any())
             {
@@ -87,10 +89,6 @@ namespace Vostok.Snitch.Core.Topologies
                 filteredByPath = filteredByPath.Where(c => c.Replica.Path.Length == maxMatch).ToList();
                 candidate = filteredByPath;
             }
-
-            var filteredByEnvironment = candidate.Where(c => c.Key.Environment == environment).ToList();
-            if (filteredByEnvironment.Any())
-                candidate = filteredByEnvironment;
 
             var filteredBySource = candidate.Where(c => c.Source == TopologyReplicaMeta.SdSource).ToList();
             if (filteredBySource.Any())
@@ -223,6 +221,9 @@ namespace Vostok.Snitch.Core.Topologies
                 Replica = replica;
                 Source = source;
             }
+
+            public override string ToString() =>
+                $"{nameof(Key)}: {Key}, {nameof(Replica)}: {Replica}, {nameof(Source)}: {Source}";
         }
     }
 }
