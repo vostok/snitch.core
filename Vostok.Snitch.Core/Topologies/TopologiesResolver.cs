@@ -26,7 +26,7 @@ namespace Vostok.Snitch.Core.Topologies
 
         private readonly TopologiesResolverSettings settings;
         private readonly ILog log;
-        private readonly ConcurrentDictionary<TopologyReplica, List<TopologyKey>> topologies;
+        private readonly ConcurrentDictionary<(string host, int port), List<TopologyReplicaMeta>> topologies;
         private readonly ConcurrentDictionary<string, string> hosts;
         private readonly CcTopologiesProvider ccTopologiesProvider;
         private readonly SdTopologiesProvider sdTopologiesProvider;
@@ -37,7 +37,7 @@ namespace Vostok.Snitch.Core.Topologies
         {
             this.settings = settings;
             this.log = log = log.ForContext<TopologiesResolver>();
-            topologies = new ConcurrentDictionary<TopologyReplica, List<TopologyKey>>();
+            topologies = new ConcurrentDictionary<(string host, int port), List<TopologyReplicaMeta>>();
             hosts = new ConcurrentDictionary<string, string>();
             ccTopologiesProvider = new CcTopologiesProvider(settings.ClusterConfigClient, log);
             sdTopologiesProvider = new SdTopologiesProvider(settings.ServiceDiscoveryClient, settings.EnvironmentsWhitelist, log);
@@ -60,7 +60,6 @@ namespace Vostok.Snitch.Core.Topologies
             hosts.TryGetValue(host, out var result) ? result : host;
 
         [NotNull]
-        [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
         public IEnumerable<TopologyKey> Resolve([NotNull] Uri url, [CanBeNull] string environment, [CanBeNull] string service)
         {
             if (state == NotStarted)
@@ -69,7 +68,7 @@ namespace Vostok.Snitch.Core.Topologies
             environment = environment ?? TopologyKey.DefaultEnvironment;
 
             var replica = new TopologyReplica(ResolveHost(url.DnsSafeHost), url.Port, url.AbsolutePath);
-            if (!topologies.TryGetValue(replica, out var nonFiltered))
+            if (!topologies.TryGetValue((replica.Host, replica.Port), out var candidate) || !candidate.Any())
             {
                 if (service != null)
                     return new[] {new TopologyKey(environment, service)};
@@ -77,15 +76,19 @@ namespace Vostok.Snitch.Core.Topologies
                 return Enumerable.Empty<TopologyKey>();
             }
 
-            var filteredByService = nonFiltered.Where(k => k.Service == service);
-            if (!filteredByService.Any())
-                return nonFiltered;
+            var filteredByService = candidate.Where(c => c.Key.Service == service).ToList();
+            if (filteredByService.Any())
+                candidate = filteredByService;
 
-            var filteredByEnvironment = filteredByService.Where(k => k.Environment == environment);
-            if (!filteredByEnvironment.Any())
-                return filteredByService;
+            var filteredByEnvironment = candidate.Where(c => c.Key.Environment == environment).ToList();
+            if (filteredByEnvironment.Any())
+                candidate = filteredByEnvironment;
 
-            return filteredByEnvironment;
+            var filteredByPath = candidate.Where(c => url.AbsolutePath.StartsWith(c.Replica.Path)).ToList();
+            if (filteredByPath.Any())
+                candidate = filteredByPath;
+
+            return candidate.Select(c => c.Key).Distinct();
         }
 
         public void Dispose()
@@ -124,17 +127,18 @@ namespace Vostok.Snitch.Core.Topologies
         private void UpdateTopologies()
         {
             // ReSharper disable once ParameterHidesMember
-            Dictionary<TopologyReplica, HashSet<TopologyKey>> BuildMapping(List<Topology> topologies)
+            Dictionary<(string host, int port), List<TopologyReplicaMeta>> BuildMapping(List<Topology> topologies, int source)
             {
-                var mapping = new Dictionary<TopologyReplica, HashSet<TopologyKey>>();
+                var mapping = new Dictionary<(string host, int port), List<TopologyReplicaMeta>>();
 
                 foreach (var topology in topologies)
                 {
                     foreach (var replica in topology.Replicas)
                     {
-                        if (!mapping.ContainsKey(replica))
-                            mapping[replica] = new HashSet<TopologyKey>();
-                        mapping[replica].Add(topology.Key);
+                        var key = (replica.Host, replica.Port);
+                        if (!mapping.ContainsKey(key))
+                            mapping[key] = new List<TopologyReplicaMeta>();
+                        mapping[key].Add(new TopologyReplicaMeta(topology.Key, replica, source));
                     }
                 }
 
@@ -143,12 +147,12 @@ namespace Vostok.Snitch.Core.Topologies
 
             var sw = Stopwatch.StartNew();
             var ccTopologies = ccTopologiesProvider.Get();
-            var ccMapping = BuildMapping(ccTopologies);
+            var ccMapping = BuildMapping(ccTopologies, TopologyReplicaMeta.CcSource);
             log.Info("Resolved {Count} topologies from ClusterConfig in {Elapsed}.", ccTopologies.Count, sw.Elapsed.ToPrettyString());
             
             sw.Restart();
             var sdTopologies = sdTopologiesProvider.GetAsync().GetAwaiter().GetResult();
-            var sdMapping = BuildMapping(sdTopologies);
+            var sdMapping = BuildMapping(sdTopologies, TopologyReplicaMeta.SdSource);
             log.Info("Resolved {Count} topologies from ServiceDiscovery in {Elapsed}.", sdTopologies.Count, sw.Elapsed.ToPrettyString());
 
             var mergedMapping = sdMapping.ToDictionary(x => x.Key, x => x.Value);
@@ -180,7 +184,7 @@ namespace Vostok.Snitch.Core.Topologies
             
             foreach (var t in topologies)
             {
-                var host = t.Key.Host;
+                var host = t.Key.host;
                 if (used.Contains(host))
                     continue;
                 used.Add(host);
@@ -194,6 +198,23 @@ namespace Vostok.Snitch.Core.Topologies
             }
 
             log.Info("Resolved {Count} host addresses in {Elapsed}.", hosts.Count, sw.Elapsed.ToPrettyString());
+        }
+
+        internal struct TopologyReplicaMeta
+        {
+            public const int SdSource = 0;
+            public const int CcSource = 1;
+
+            public TopologyKey Key;
+            public TopologyReplica Replica;
+            public int Source;
+
+            public TopologyReplicaMeta(TopologyKey key, TopologyReplica replica, int source)
+            {
+                Key = key;
+                Replica = replica;
+                Source = source;
+            }
         }
     }
 }
