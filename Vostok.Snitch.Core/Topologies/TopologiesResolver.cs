@@ -93,8 +93,6 @@ namespace Vostok.Snitch.Core.Topologies
             var filteredBySource = candidate.Where(c => c.Source == TopologyReplicaMeta.SdSource).ToList();
             if (filteredBySource.Any())
                 candidate = filteredBySource;
-            else
-                candidate = candidate.Where(c => c.Key.Service == candidate.Min(cc => cc.Key.Service)).ToList();
 
             return candidate.Select(c => c.Key).Distinct();
         }
