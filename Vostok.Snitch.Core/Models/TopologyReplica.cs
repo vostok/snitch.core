@@ -16,7 +16,7 @@ namespace Vostok.Snitch.Core.Models
         {
         }
 
-        internal TopologyReplica(string host, int port, string path)
+        public TopologyReplica(string host, int port, string path)
         {
             Host = CutHostname(host).ToLowerInvariant();
             Port = port;
