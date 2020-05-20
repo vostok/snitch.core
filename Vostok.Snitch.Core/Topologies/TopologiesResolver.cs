@@ -2,16 +2,15 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Vostok.Commons.Helpers.Extensions;
+using Vostok.Commons.Helpers.Network;
 using Vostok.Commons.Threading;
 using Vostok.Commons.Time;
 using Vostok.Logging.Abstractions;
 using Vostok.Snitch.Core.Models;
-using Vostok.Commons.Helpers.Network;
 
 namespace Vostok.Snitch.Core.Topologies
 {
@@ -30,8 +29,8 @@ namespace Vostok.Snitch.Core.Topologies
         private readonly ConcurrentDictionary<string, string> hosts;
         private readonly CcTopologiesProvider ccTopologiesProvider;
         private readonly SdTopologiesProvider sdTopologiesProvider;
-        private volatile Task updateCacheTask;
         private readonly DnsResolver dnsResolver;
+        private volatile Task updateCacheTask;
 
         public TopologiesResolver(TopologiesResolverSettings settings, ILog log)
         {
@@ -88,6 +87,11 @@ namespace Vostok.Snitch.Core.Topologies
                 var maxMatch = filteredByPath.Max(c => c.Replica.Path.Length);
                 filteredByPath = filteredByPath.Where(c => c.Replica.Path.Length == maxMatch).ToList();
                 candidate = filteredByPath;
+            }
+            else
+            {
+                // Note(kungurtsev): no url with same path.
+                return Enumerable.Empty<TopologyKey>();
             }
 
             var filteredBySource = candidate.Where(c => c.Source == TopologyReplicaMeta.SdSource).ToList();
@@ -155,7 +159,7 @@ namespace Vostok.Snitch.Core.Topologies
             var ccTopologies = ccTopologiesProvider.Get();
             var ccMapping = BuildMapping(ccTopologies, TopologyReplicaMeta.CcSource);
             log.Info("Resolved {Count} topologies from ClusterConfig in {Elapsed}.", ccTopologies.Count, sw.Elapsed.ToPrettyString());
-            
+
             sw.Restart();
             var sdTopologies = sdTopologiesProvider.GetAsync().GetAwaiter().GetResult();
             var sdMapping = BuildMapping(sdTopologies, TopologyReplicaMeta.SdSource);
@@ -179,7 +183,7 @@ namespace Vostok.Snitch.Core.Topologies
             {
                 topologies[pair.Key] = pair.Value.ToList();
             }
-            
+
             log.Info("Resolved {Count} topology keys.", topologies.Count);
         }
 
@@ -187,14 +191,14 @@ namespace Vostok.Snitch.Core.Topologies
         {
             var used = new HashSet<string>();
             var sw = Stopwatch.StartNew();
-            
+
             foreach (var t in topologies)
             {
                 var host = t.Key.host;
                 if (used.Contains(host))
                     continue;
                 used.Add(host);
-                
+
                 var ips = dnsResolver.Resolve(host, true);
 
                 foreach (var ip in ips)
