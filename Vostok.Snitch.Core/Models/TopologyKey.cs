@@ -3,7 +3,7 @@
 namespace Vostok.Snitch.Core.Models
 {
     [PublicAPI]
-    public struct TopologyKey
+    public class TopologyKey
     {
         public const string DefaultEnvironment = "default";
 

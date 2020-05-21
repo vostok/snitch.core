@@ -2,7 +2,7 @@
 
 namespace Vostok.Snitch.Core.Models
 {
-    internal struct Topology
+    internal class Topology
     {
         public readonly TopologyKey Key;
         public readonly IReadOnlyList<TopologyReplica> Replicas;
