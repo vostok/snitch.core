@@ -64,6 +64,26 @@ namespace Vostok.Snitch.Core.Topologies
             if (state == NotStarted)
                 throw new InvalidOperationException("Warmup should be called first.");
 
+            var result = ResolveInner(url, environment, service)
+                .Select(t => TryRedirect(t))
+                .Distinct()
+                .ToList();
+
+            return result;
+        }
+        
+        public void Dispose()
+        {
+            if (state.TryIncreaseTo(Disposed))
+            {
+                updateCacheSignal.Set();
+
+                updateCacheTask?.GetAwaiter().GetResult();
+            }
+        }
+
+        private IEnumerable<TopologyKey> ResolveInner(Uri url, string environment, string service)
+        {
             var replica = new TopologyReplica(ResolveHost(url.DnsSafeHost), url.Port, url.AbsolutePath);
             if (!topologies.TryGetValue((replica.Host, replica.Port), out var candidate) || !candidate.Any())
             {
@@ -98,17 +118,17 @@ namespace Vostok.Snitch.Core.Topologies
             if (filteredBySource.Any())
                 candidate = filteredBySource;
 
-            return candidate.Select(c => c.Key).Distinct();
+            return candidate.Select(c => c.Key);
         }
 
-        public void Dispose()
+        private TopologyKey TryRedirect(TopologyKey topology)
         {
-            if (state.TryIncreaseTo(Disposed))
-            {
-                updateCacheSignal.Set();
+            var redirections = settings.ServiceNamesRedirections?.Invoke();
 
-                updateCacheTask?.GetAwaiter().GetResult();
-            }
+            if (redirections != null && redirections.TryGetValue(topology.Service, out var newService))
+                return new TopologyKey(topology.Environment, newService);
+
+            return topology;
         }
 
         private async Task UpdateCacheTask()
