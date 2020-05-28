@@ -28,7 +28,5 @@ namespace Vostok.Snitch.Core.Topologies
         public TimeSpan DnsResolveTimeout { get; set; } = 1.Seconds();
 
         public Func<IReadOnlyCollection<string>> EnvironmentsWhitelist { get; set; } = () => new[] {TopologyKey.DefaultEnvironment};
-
-        public Func<IReadOnlyDictionary<string, string>> ServiceNamesRedirections { get; set; }
     }
 }
