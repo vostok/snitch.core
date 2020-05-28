@@ -93,7 +93,12 @@ namespace Vostok.Snitch.Core.Topologies
             var maxMatch = candidate.Max(c => c.Replica.Path.Length);
             candidate = candidate.Where(c => c.Replica.Path.Length == maxMatch).ToList();
 
-            return candidate.Select(c => c.Key).Distinct();
+            var result = candidate.Select(c => c.Key).ToList();
+
+            if (service != null && service.Contains(" via "))
+                result.Add(new TopologyKey(environment ?? TopologyKey.DefaultEnvironment, service));
+
+            return result.Distinct();
         }
 
         public void Dispose()
