@@ -82,21 +82,16 @@ namespace Vostok.Snitch.Core.Topologies
                 candidate = filteredByEnvironment;
 
             var filteredByPath = candidate.Where(c => url.AbsolutePath.StartsWith(c.Replica.Path)).ToList();
-            if (filteredByPath.Any())
-            {
-                var maxMatch = filteredByPath.Max(c => c.Replica.Path.Length);
-                filteredByPath = filteredByPath.Where(c => c.Replica.Path.Length == maxMatch).ToList();
-                candidate = filteredByPath;
-            }
-            else
-            {
-                // Note(kungurtsev): no url with same path.
+            if (!filteredByPath.Any())
                 return Enumerable.Empty<TopologyKey>();
-            }
+            candidate = filteredByPath;
 
             var filteredBySource = candidate.Where(c => c.Source == TopologyReplicaMeta.SdSource).ToList();
             if (filteredBySource.Any())
                 candidate = filteredBySource;
+
+            var maxMatch = candidate.Max(c => c.Replica.Path.Length);
+            candidate = candidate.Where(c => c.Replica.Path.Length == maxMatch).ToList();
 
             return candidate.Select(c => c.Key).Distinct();
         }
