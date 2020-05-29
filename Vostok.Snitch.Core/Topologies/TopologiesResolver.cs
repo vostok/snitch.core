@@ -64,14 +64,29 @@ namespace Vostok.Snitch.Core.Topologies
             if (state == NotStarted)
                 throw new InvalidOperationException("Warmup should be called first.");
 
+            var result = ResolveInner(url, environment, service).ToList();
+
+            if (!string.IsNullOrEmpty(service) && (!result.Any() || service.Contains(" via ")))
+                result.Add(new TopologyKey(environment ?? TopologyKey.DefaultEnvironment, service));
+
+            return result.Distinct();
+        }
+
+        public void Dispose()
+        {
+            if (state.TryIncreaseTo(Disposed))
+            {
+                updateCacheSignal.Set();
+
+                updateCacheTask?.GetAwaiter().GetResult();
+            }
+        }
+
+        private IEnumerable<TopologyKey> ResolveInner(Uri url, string environment, string service)
+        {
             var replica = new TopologyReplica(ResolveHost(url.DnsSafeHost), url.Port, url.AbsolutePath);
             if (!topologies.TryGetValue((replica.Host, replica.Port), out var candidate) || !candidate.Any())
-            {
-                if (service != null)
-                    return new[] {new TopologyKey(environment ?? TopologyKey.DefaultEnvironment, service)};
-
                 return Enumerable.Empty<TopologyKey>();
-            }
 
             var filteredByService = candidate.Where(c => c.Key.Service == service).ToList();
             if (filteredByService.Any())
@@ -93,22 +108,7 @@ namespace Vostok.Snitch.Core.Topologies
             var maxMatch = candidate.Max(c => c.Replica.Path.Length);
             candidate = candidate.Where(c => c.Replica.Path.Length == maxMatch).ToList();
 
-            var result = candidate.Select(c => c.Key).ToList();
-
-            if (service != null && service.Contains(" via "))
-                result.Add(new TopologyKey(environment ?? TopologyKey.DefaultEnvironment, service));
-
-            return result.Distinct();
-        }
-
-        public void Dispose()
-        {
-            if (state.TryIncreaseTo(Disposed))
-            {
-                updateCacheSignal.Set();
-
-                updateCacheTask?.GetAwaiter().GetResult();
-            }
+            return candidate.Select(c => c.Key);
         }
 
         private async Task UpdateCacheTask()
