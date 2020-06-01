@@ -39,16 +39,16 @@ namespace Vostok.Snitch.Core.Tests
         {
             var serviceSettings = new ResponseCodeClassifierServiceSettings
             {
-                SuccessCodes = new List<ResponseCode> {ResponseCode.InternalServerError},
-                WarningCodes = new List<ResponseCode> {ResponseCode.Created},
-                ErrorCodes = new List<ResponseCode> {ResponseCode.Ok}
+                SuccessCodes = new HashSet<ResponseCode> {ResponseCode.InternalServerError},
+                WarningCodes = new HashSet<ResponseCode> {ResponseCode.Created},
+                ErrorCodes = new HashSet<ResponseCode> {ResponseCode.Ok}
             };
 
             var settings = new ResponseCodeClassifierSettings
             {
-                SuccessCodes = new List<ResponseCode> {ResponseCode.NotImplemented},
-                WarningCodes = new List<ResponseCode> {ResponseCode.Accepted},
-                ErrorCodes = new List<ResponseCode> {ResponseCode.NoContent},
+                SuccessCodes = new HashSet<ResponseCode> {ResponseCode.NotImplemented},
+                WarningCodes = new HashSet<ResponseCode> {ResponseCode.Accepted},
+                ErrorCodes = new HashSet<ResponseCode> {ResponseCode.NoContent},
                 PerServiceSettings = new Dictionary<string, ResponseCodeClassifierServiceSettings>
                 {
                     ["service"] = serviceSettings
