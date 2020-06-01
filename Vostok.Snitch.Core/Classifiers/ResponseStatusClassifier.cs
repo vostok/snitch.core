@@ -49,12 +49,14 @@ namespace Vostok.Snitch.Core.Classifiers
             if (Equals(status, ClusterResultStatus.TimeExpired))
                 return ClassifyTimeout();
 
-            if (Equals(status, ClusterResultStatus.IncorrectArguments) ||
-                Equals(status, ClusterResultStatus.ReplicasExhausted) ||
+            if (Equals(status, ClusterResultStatus.ReplicasExhausted) ||
                 Equals(status, ClusterResultStatus.ReplicasNotFound) ||
                 Equals(status, ClusterResultStatus.Throttled) ||
                 Equals(status, ClusterResultStatus.UnexpectedException))
                 return ResponseStatusClass.Error;
+
+            if (Equals(status, ClusterResultStatus.IncorrectArguments))
+                return ResponseStatusClass.Warning;
 
             return ResponseStatusClass.Success;
         }
