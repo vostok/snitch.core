@@ -46,7 +46,7 @@ namespace Vostok.Snitch.Core.Topologies
                         replicas));
 
 #if DEBUG
-                    if (result.Count > 500)
+                    if (result.Count > 100)
                         return result;
 #endif
                 }

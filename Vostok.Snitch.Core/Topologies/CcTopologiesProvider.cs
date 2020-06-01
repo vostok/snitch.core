@@ -31,6 +31,11 @@ namespace Vostok.Snitch.Core.Topologies
 
         private static void Dfs(ISettingsNode node, string path, List<Topology> result, ClusterConfigReplicasParser parser)
         {
+#if DEBUG
+            if (result.Count > 100)
+                return;
+#endif
+
             if (node.Flatten().ContainsKey(string.Empty))
             {
                 var urls = parser.Parse(node, path);
