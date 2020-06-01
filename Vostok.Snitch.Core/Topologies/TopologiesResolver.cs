@@ -84,6 +84,9 @@ namespace Vostok.Snitch.Core.Topologies
 
         private IEnumerable<TopologyKey> ResolveInner(Uri url, string environment, string service)
         {
+            if (!url.IsAbsoluteUri)
+                return Enumerable.Empty<TopologyKey>();
+
             var replica = new TopologyReplica(ResolveHost(url.DnsSafeHost), url.Port, url.AbsolutePath);
             if (!topologies.TryGetValue((replica.Host, replica.Port), out var candidate) || !candidate.Any())
                 return Enumerable.Empty<TopologyKey>();
