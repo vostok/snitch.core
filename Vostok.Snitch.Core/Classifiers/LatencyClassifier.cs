@@ -1,7 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 
-namespace Vostok.Snitch.Core
+namespace Vostok.Snitch.Core.Classifiers
 {
     [PublicAPI]
     public class LatencyClassifier

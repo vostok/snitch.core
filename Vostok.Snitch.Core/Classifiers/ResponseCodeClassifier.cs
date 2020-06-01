@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 using Vostok.Clusterclient.Core.Model;
 using Vostok.Snitch.Core.Models;
 
-namespace Vostok.Snitch.Core
+namespace Vostok.Snitch.Core.Classifiers
 {
     [PublicAPI]
     public class ResponseCodeClassifier
@@ -20,19 +20,13 @@ namespace Vostok.Snitch.Core
             var settings = settingsProvider?.Invoke() ?? new ResponseCodeClassifierSettings();
             var serviceSettings = GetServiceSettings(settings, service);
 
-            if (serviceSettings?.SuccessCodes?.Contains(code) == true)
-                return ResponseCodeClass.Success;
-            if (serviceSettings?.WarningCodes?.Contains(code) == true)
-                return ResponseCodeClass.Warning;
-            if (serviceSettings?.ErrorCodes?.Contains(code) == true)
-                return ResponseCodeClass.Error;
+            var serviceCodeClass = TryClassify(code, serviceSettings);
+            if (serviceCodeClass != null)
+                return serviceCodeClass.Value;
 
-            if (settings.SuccessCodes?.Contains(code) == true)
-                return ResponseCodeClass.Success;
-            if (settings.WarningCodes?.Contains(code) == true)
-                return ResponseCodeClass.Warning;
-            if (settings.ErrorCodes?.Contains(code) == true)
-                return ResponseCodeClass.Error;
+            var codeClass = TryClassify(code, settings);
+            if (codeClass != null)
+                return codeClass.Value;
 
             if (code.IsSuccessful() || code.IsRedirection() || code.IsInformational())
                 return ResponseCodeClass.Success;
@@ -55,6 +49,18 @@ namespace Vostok.Snitch.Core
                 return ResponseCodeClass.Error;
 
             return ResponseCodeClass.Warning;
+        }
+
+        private ResponseCodeClass? TryClassify(ResponseCode code, ResponseCodeClassifierServiceSettings settings)
+        {
+            if (settings?.SuccessCodes?.Contains(code) == true)
+                return ResponseCodeClass.Success;
+            if (settings?.WarningCodes?.Contains(code) == true)
+                return ResponseCodeClass.Warning;
+            if (settings?.ErrorCodes?.Contains(code) == true)
+                return ResponseCodeClass.Error;
+
+            return null;
         }
 
         private ResponseCodeClassifierServiceSettings GetServiceSettings(ResponseCodeClassifierSettings settings, string service)

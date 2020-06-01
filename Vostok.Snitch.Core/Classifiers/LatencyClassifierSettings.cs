@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using Vostok.Commons.Time;
 
-namespace Vostok.Snitch.Core
+namespace Vostok.Snitch.Core.Classifiers
 {
     [PublicAPI]
     public class LatencyClassifierSettings

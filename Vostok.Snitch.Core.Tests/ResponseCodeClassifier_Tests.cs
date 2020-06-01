@@ -3,6 +3,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using Vostok.Clusterclient.Core.Model;
 using Vostok.Commons.Time;
+using Vostok.Snitch.Core.Classifiers;
 using Vostok.Snitch.Core.Models;
 
 namespace Vostok.Snitch.Core.Tests

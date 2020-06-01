@@ -2,6 +2,7 @@
 using FluentAssertions;
 using NUnit.Framework;
 using Vostok.Commons.Time;
+using Vostok.Snitch.Core.Classifiers;
 
 namespace Vostok.Snitch.Core.Tests
 {

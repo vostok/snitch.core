@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using Vostok.Clusterclient.Core.Model;
 
-namespace Vostok.Snitch.Core
+namespace Vostok.Snitch.Core.Classifiers
 {
     [PublicAPI]
     public class ResponseCodeClassifierServiceSettings
@@ -12,12 +12,12 @@ namespace Vostok.Snitch.Core
         public TimeSpan? TimeoutErrorClassificationThreshold { get; set; }
 
         [CanBeNull]
-        public List<ResponseCode> SuccessCodes { get; set; }
+        public HashSet<ResponseCode> SuccessCodes { get; set; }
 
         [CanBeNull]
-        public List<ResponseCode> WarningCodes { get; set; }
+        public HashSet<ResponseCode> WarningCodes { get; set; }
 
         [CanBeNull]
-        public List<ResponseCode> ErrorCodes { get; set; }
+        public HashSet<ResponseCode> ErrorCodes { get; set; }
     }
 }
