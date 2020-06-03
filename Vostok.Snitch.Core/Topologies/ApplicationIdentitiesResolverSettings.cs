@@ -10,18 +10,20 @@ namespace Vostok.Snitch.Core.Topologies
     [PublicAPI]
     public class ApplicationIdentitiesResolverSettings
     {
-        public ApplicationIdentitiesResolverSettings(string unknownEnvironmentPrefix, IServiceDiscoveryManager serviceDiscoveryClient)
+        public ApplicationIdentitiesResolverSettings(string unknownEnvironmentSuffix, IServiceDiscoveryManager serviceDiscoveryClient)
         {
-            UnknownEnvironmentPrefix = unknownEnvironmentPrefix;
+            UnknownEnvironmentSuffix = unknownEnvironmentSuffix;
             ServiceDiscoveryClient = serviceDiscoveryClient;
         }
 
-        public string UnknownEnvironmentPrefix { get; }
+        public string UnknownEnvironmentSuffix { get; }
 
         public IServiceDiscoveryManager ServiceDiscoveryClient { get; }
 
         public TimeSpan IterationPeriod { get; set; } = 10.Seconds();
 
-        public Func<IReadOnlyCollection<string>> EnvironmentsWhitelist { get; set; } = () => new[] { TopologyKey.DefaultEnvironment };
+        public Func<IReadOnlyCollection<string>> EnvironmentsWhitelist { get; set; } = () => new[] {TopologyKey.DefaultEnvironment};
+
+        public Func<IReadOnlyCollection<string>> ProjectsWhitelist { get; set; } = () => new string[0];
     }
 }

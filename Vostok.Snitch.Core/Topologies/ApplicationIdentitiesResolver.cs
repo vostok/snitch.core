@@ -9,6 +9,7 @@ using Vostok.Commons.Threading;
 using Vostok.Commons.Time;
 using Vostok.Hosting.Abstractions;
 using Vostok.Logging.Abstractions;
+using Vostok.Snitch.Core.Helpers;
 using Vostok.Snitch.Core.Models;
 
 namespace Vostok.Snitch.Core.Topologies
@@ -53,12 +54,19 @@ namespace Vostok.Snitch.Core.Topologies
             if (state == NotStarted)
                 throw new InvalidOperationException("Warmup should be called first.");
 
-            if (!string.IsNullOrEmpty(service) && service.Contains(" via "))
-                service = service.Substring(0, service.IndexOf(" via ", StringComparison.InvariantCultureIgnoreCase));
+            environment = environment ?? TopologyKey.DefaultEnvironment;
+            service = service ?? "unknown";
+
+            service = NamesHelper.GetRealServiceName(service);
 
             return identities.TryGetValue((environment, service), out var result)
                 ? result
-                : new ApplicationIdentity("unknown", null, $"{settings.UnknownEnvironmentPrefix}-{environment}", service, "instance");
+                : new ApplicationIdentity(
+                    NamesHelper.GenerateProjectName(service, settings.ProjectsWhitelist?.Invoke()),
+                    null,
+                    $"{environment}-{settings.UnknownEnvironmentSuffix}",
+                    service,
+                    "instance");
         }
 
         public void Dispose()
