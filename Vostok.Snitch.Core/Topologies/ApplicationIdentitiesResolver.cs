@@ -53,6 +53,9 @@ namespace Vostok.Snitch.Core.Topologies
             if (state == NotStarted)
                 throw new InvalidOperationException("Warmup should be called first.");
 
+            if (!string.IsNullOrEmpty(service) && service.Contains(" via "))
+                service = service.Substring(0, service.IndexOf(" via ", StringComparison.InvariantCultureIgnoreCase));
+
             return identities.TryGetValue((environment, service), out var result)
                 ? result
                 : new ApplicationIdentity("unknown", null, $"{settings.UnknownEnvironmentPrefix}-{environment}", service, "instance");
