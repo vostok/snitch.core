@@ -32,7 +32,7 @@ namespace Vostok.Snitch.Core.Topologies
 
                 foreach (var application in applications)
                 {
-                    var replicas = manager.GetAllReplicasAsync(environment, application).GetAwaiter().GetResult()
+                    var replicas = (await manager.GetAllReplicasAsync(environment, application).ConfigureAwait(false))
                         .Select(UrlParser.Parse)
                         .Where(u => u != null)
                         .Select(u => new TopologyReplica(u))
