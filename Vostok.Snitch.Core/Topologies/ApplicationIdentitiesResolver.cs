@@ -123,7 +123,7 @@ namespace Vostok.Snitch.Core.Topologies
                 replica.Properties.TryGetValue(WellKnownApplicationIdentityProperties.Application, out var application);
                 replica.Properties.TryGetValue(WellKnownApplicationIdentityProperties.Instance, out var instance);
 
-                if (project != null && subproject != null && environment != null && application != null && instance != null)
+                if (project != null && environment != null && application != null && instance != null)
                     identities[(topology.Key.Environment, topology.Key.Service)] = new ApplicationIdentity(project, subproject, environment, application, instance);
             }
 
