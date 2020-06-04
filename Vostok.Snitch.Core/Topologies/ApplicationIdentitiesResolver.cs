@@ -57,10 +57,10 @@ namespace Vostok.Snitch.Core.Topologies
             environment = environment ?? TopologyKey.DefaultEnvironment;
             service = service ?? "unknown";
 
-            service = NamesHelper.GetRealServiceName(service);
+            var (realService, suffix) = NamesHelper.GetRealServiceName(service);
 
-            return identities.TryGetValue((environment, service), out var result)
-                ? result
+            return identities.TryGetValue((environment, realService), out var result)
+                ? NamesHelper.AddServiceNameSuffix(result, suffix)
                 : new ApplicationIdentity(
                     NamesHelper.GenerateProjectName(service, settings.ProjectsWhitelist?.Invoke()),
                     null,

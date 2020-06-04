@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
+using Vostok.Hosting.Abstractions;
+using Vostok.Snitch.Core.Models;
 
 namespace Vostok.Snitch.Core.Helpers
 {
@@ -21,12 +23,12 @@ namespace Vostok.Snitch.Core.Helpers
                 .Replace('~', ':');
         }
 
-        internal static string GetRealServiceName(string service)
+        internal static (string name, string suffix) GetRealServiceName(string service)
         {
-            if (!string.IsNullOrEmpty(service) && service.Contains(" via "))
-                service = service.Substring(0, service.IndexOf(" via ", StringComparison.InvariantCultureIgnoreCase));
-
-            return service;
+            var index = service.IndexOf(" via ", StringComparison.InvariantCultureIgnoreCase);
+            return index != -1
+                ? (service.Substring(0, index), service.Substring(index))
+                : (service, string.Empty);
         }
 
         internal static string GenerateProjectName(string service, IReadOnlyCollection<string> projectsWhitelist)
@@ -42,6 +44,19 @@ namespace Vostok.Snitch.Core.Helpers
             }
 
             return "unknown";
+        }
+
+        internal static IVostokApplicationIdentity AddServiceNameSuffix(IVostokApplicationIdentity identity, string suffix)
+        {
+            if (string.IsNullOrEmpty(suffix))
+                return identity;
+
+            return new ApplicationIdentity(
+                identity.Project,
+                identity.Subproject,
+                identity.Environment,
+                $"{identity.Application}{suffix}",
+                identity.Instance);
         }
     }
 }
