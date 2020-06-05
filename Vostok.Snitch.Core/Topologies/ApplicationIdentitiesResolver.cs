@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Vostok.Commons.Helpers.Extensions;
@@ -26,6 +27,7 @@ namespace Vostok.Snitch.Core.Topologies
         private readonly ILog log;
         private readonly SdTopologiesProvider sdTopologiesProvider;
         private readonly ConcurrentDictionary<(string environment, string service), IVostokApplicationIdentity> identities;
+        private readonly ConcurrentDictionary<string, string> parentEnvironment;
         private volatile Task updateCacheTask;
 
         public ApplicationIdentitiesResolver(ApplicationIdentitiesResolverSettings settings, ILog log)
@@ -35,6 +37,7 @@ namespace Vostok.Snitch.Core.Topologies
 
             sdTopologiesProvider = new SdTopologiesProvider(settings.ServiceDiscoveryClient, settings.EnvironmentsWhitelist, log);
             identities = new ConcurrentDictionary<(string environment, string service), IVostokApplicationIdentity>();
+            parentEnvironment = new ConcurrentDictionary<string, string>();
         }
 
         public void Warmup()
@@ -53,17 +56,30 @@ namespace Vostok.Snitch.Core.Topologies
             if (state == NotStarted)
                 throw new InvalidOperationException("Warmup should be called first.");
 
-            environment = environment ?? TopologyKey.DefaultEnvironment;
+            var originEnvironment = environment = environment ?? TopologyKey.DefaultEnvironment;
             service = service ?? "unknown";
 
             var (realService, suffix) = NamesHelper.GetRealServiceName(service);
+            IVostokApplicationIdentity result = null;
 
-            return identities.TryGetValue((environment, realService), out var result)
+            for (var deep = 0; deep < 10 && environment != null; deep++)
+            {
+                if (identities.TryGetValue((environment, realService), out result))
+                {
+                    originEnvironment = environment;
+                    break;
+                }
+
+                if (parentEnvironment.TryGetValue(environment, out var p))
+                    environment = p;
+            }
+
+            return result != null
                 ? NamesHelper.AddServiceNameSuffix(result, suffix)
                 : new ApplicationIdentity(
                     NamesHelper.GenerateProjectName(service, settings.ProjectsWhitelist?.Invoke()),
                     null,
-                    $"{environment}-{settings.UnknownEnvironmentSuffix}",
+                    $"{originEnvironment}-{settings.UnknownEnvironmentSuffix}",
                     service,
                     "instance");
         }
@@ -93,6 +109,7 @@ namespace Vostok.Snitch.Core.Topologies
             try
             {
                 await UpdateIdentitiesAsync().ConfigureAwait(false);
+                await UpdateEnvironmentsAsync().ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -109,6 +126,9 @@ namespace Vostok.Snitch.Core.Topologies
             foreach (var topology in sdTopologies)
             {
                 var replicas = await settings.ServiceDiscoveryClient.GetAllReplicasAsync(topology.Key.Environment, topology.Key.Service).ConfigureAwait(false);
+
+                if (!replicas.Any())
+                    continue;
 
                 foreach (var r in replicas)
                 {
@@ -128,9 +148,28 @@ namespace Vostok.Snitch.Core.Topologies
                         break;
                     }
                 }
+
+                if (!identities.ContainsKey((topology.Key.Environment, topology.Key.Service)))
+                    identities[(topology.Key.Environment, topology.Key.Service)] = null;
             }
 
             log.Info("Resolved {Count} identities in {Elapsed}.", identities.Count, sw.Elapsed.ToPrettyString());
+        }
+
+        private async Task UpdateEnvironmentsAsync()
+        {
+            var sw = Stopwatch.StartNew();
+            var environments = await settings.ServiceDiscoveryClient.GetAllEnvironmentsAsync().ConfigureAwait(false);
+
+            foreach (var e in environments)
+            {
+                var environment = await settings.ServiceDiscoveryClient.GetEnvironmentAsync(e).ConfigureAwait(false);
+
+                if (environment != null)
+                    parentEnvironment[environment.Environment] = environment.ParentEnvironment;
+            }
+
+            log.Info("Resolved {Count} environments in {Elapsed}.", environments.Count, sw.Elapsed.ToPrettyString());
         }
     }
 }
