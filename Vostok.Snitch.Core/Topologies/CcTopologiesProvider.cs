@@ -39,7 +39,7 @@ namespace Vostok.Snitch.Core.Topologies
             if (node.Flatten().ContainsKey(string.Empty))
             {
                 var urls = parser.Parse(node, path);
-                if (urls != null && urls.Any())
+                if (urls != null)
                 {
                     result.Add(new Topology(new TopologyKey(TopologyKey.DefaultEnvironment, path), urls.Select(u => new TopologyReplica(u)).ToList()));
                 }

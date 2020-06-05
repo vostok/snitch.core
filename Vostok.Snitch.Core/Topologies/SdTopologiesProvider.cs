@@ -38,9 +38,6 @@ namespace Vostok.Snitch.Core.Topologies
                         .Select(u => new TopologyReplica(u))
                         .ToList();
 
-                    if (!replicas.Any())
-                        continue;
-
                     result.Add(new Topology(
                         new TopologyKey(environment, application), 
                         replicas));
