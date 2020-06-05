@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Vostok.Commons.Helpers.Extensions;
@@ -110,21 +109,25 @@ namespace Vostok.Snitch.Core.Topologies
             foreach (var topology in sdTopologies)
             {
                 var replicas = await settings.ServiceDiscoveryClient.GetAllReplicasAsync(topology.Key.Environment, topology.Key.Service).ConfigureAwait(false);
-                if (!replicas.Any())
-                    continue;
 
-                var replica = await settings.ServiceDiscoveryClient.GetReplicaAsync(topology.Key.Environment, topology.Key.Service, replicas.First()).ConfigureAwait(false);
-                if (replica?.Properties == null)
-                    continue;
+                foreach (var r in replicas)
+                {
+                    var replica = await settings.ServiceDiscoveryClient.GetReplicaAsync(topology.Key.Environment, topology.Key.Service, r).ConfigureAwait(false);
+                    if (replica?.Properties == null)
+                        continue;
 
-                replica.Properties.TryGetValue(WellKnownApplicationIdentityProperties.Project, out var project);
-                replica.Properties.TryGetValue(WellKnownApplicationIdentityProperties.Subproject, out var subproject);
-                replica.Properties.TryGetValue(WellKnownApplicationIdentityProperties.Environment, out var environment);
-                replica.Properties.TryGetValue(WellKnownApplicationIdentityProperties.Application, out var application);
-                replica.Properties.TryGetValue(WellKnownApplicationIdentityProperties.Instance, out var instance);
+                    replica.Properties.TryGetValue(WellKnownApplicationIdentityProperties.Project, out var project);
+                    replica.Properties.TryGetValue(WellKnownApplicationIdentityProperties.Subproject, out var subproject);
+                    replica.Properties.TryGetValue(WellKnownApplicationIdentityProperties.Environment, out var environment);
+                    replica.Properties.TryGetValue(WellKnownApplicationIdentityProperties.Application, out var application);
+                    replica.Properties.TryGetValue(WellKnownApplicationIdentityProperties.Instance, out var instance);
 
-                if (project != null && environment != null && application != null && instance != null)
-                    identities[(topology.Key.Environment, topology.Key.Service)] = new ApplicationIdentity(project, subproject, environment, application, instance);
+                    if (project != null && environment != null && application != null && instance != null)
+                    {
+                        identities[(topology.Key.Environment, topology.Key.Service)] = new ApplicationIdentity(project, subproject, environment, application, instance);
+                        break;
+                    }
+                }
             }
 
             log.Info("Resolved {Count} identities in {Elapsed}.", identities.Count, sw.Elapsed.ToPrettyString());
