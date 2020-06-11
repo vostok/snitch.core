@@ -69,7 +69,8 @@ namespace Vostok.Snitch.Core.Topologies
             if (!string.IsNullOrEmpty(service) && (!result.Any() || service.Contains(" via ")))
                 result.Add(new TopologyKey(environment ?? TopologyKey.DefaultEnvironment, service));
 
-            return result.Distinct();
+            var environmentsWhitelist = settings.EnvironmentsWhitelist();
+            return result.Where(t => environmentsWhitelist.Contains(t.Environment)).Distinct();
         }
 
         public void Dispose()
